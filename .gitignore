@@ -7,8 +7,26 @@
 # BlueJ files
 *.ctxt
 
+# Maven
+target/
+!.mvn/wrapper/maven-wrapper.jar
+**/logs/
+*.log
+
+
+# Eclipse
+.project
+.classpath
+.settings/
+*.tmp
+*.bak
+*.swp
+
 # Mobile Tools for Java (J2ME)
 .mtj.tmp/
+
+# STS (Spring Tool Suite)
+.springBeans
 
 # Package Files #
 *.jar
@@ -22,3 +40,15 @@
 # virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
 hs_err_pid*
 replay_pid*
+
+# Archivos personales o de entorno
+.env
+*.env
+
+# VSCode (si usas Visual Studio Code)
+.vscode/
+
+# Otros
+node_modules/
+
+*.properties
