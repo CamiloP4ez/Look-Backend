@@ -48,7 +48,7 @@ public interface UserMapper {
     @Named("rolesToRoleNames")
     default Set<String> mapRoles(Set<Role> roles) {
         if (roles == null) {
-            return Collections.emptySet(); // O null si prefieres
+            return Collections.emptySet(); 
         }
         return roles.stream()
                     .map(Role::getName)
