@@ -14,11 +14,11 @@ import java.util.List;
 @Mapper(componentModel = "spring", nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
 public interface MessageMapper {
 
-    @Mapping(target = "senderId", ignore = true) // Se establece en el servicio
-    @Mapping(target = "timestamp", ignore = true) // Se establece en el servicio
+    @Mapping(target = "senderId", ignore = true) 
+    @Mapping(target = "timestamp", ignore = true) 
     Message messageRequestDtoToMessage(MessageRequestDto dto);
 
-    @Mapping(target = "senderUsername", ignore = true) // Se enriquece en el servicio
+    @Mapping(target = "senderUsername", ignore = true) 
     MessageDto messageToMessageDto(Message message);
 
     List<MessageDto> messagesToMessageDtos(List<Message> messages);

@@ -14,12 +14,12 @@ import com.look.entity.Comment;
 public interface CommentMapper {
 
     @Mapping(target = "id", ignore = true)
-    @Mapping(target = "postId", ignore = true) // Se establece en el servicio
-    @Mapping(target = "userId", ignore = true) // Se establece en el servicio
-    @Mapping(target = "createdAt", ignore = true) // Se establece en el servicio
+    @Mapping(target = "postId", ignore = true) 
+    @Mapping(target = "userId", ignore = true) 
+    @Mapping(target = "createdAt", ignore = true) 
     Comment commentRequestDtoToComment(CommentRequestDto dto);
 
-    @Mapping(target = "authorUsername", ignore = true) // Se establece en el servicio
+    @Mapping(target = "authorUsername", ignore = true) 
     CommentResponseDto commentToCommentResponseDto(Comment comment);
 
     @Mapping(target = "id", ignore = true)

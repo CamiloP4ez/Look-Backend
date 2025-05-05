@@ -12,9 +12,9 @@ import java.util.List;
 @Mapper(componentModel = "spring", uses = {MessageMapper.class}, nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
 public interface ChatMapper {
 
-    @Mapping(target = "user1Username", ignore = true) // Enriquecido en servicio
-    @Mapping(target = "user2Username", ignore = true) // Enriquecido en servicio
-    @Mapping(target = "lastMessage", ignore = true) // Calculado en servicio
+    @Mapping(target = "user1Username", ignore = true) 
+    @Mapping(target = "user2Username", ignore = true) 
+    @Mapping(target = "lastMessage", ignore = true) 
     ChatResponseDto chatToChatResponseDto(Chat chat);
 
     List<ChatResponseDto> chatsToChatResponseDtos(List<Chat> chats);
