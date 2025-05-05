@@ -14,16 +14,13 @@ import org.springframework.data.mongodb.core.mapping.Field;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Document(collection = "roles") // Nueva colección "roles"
+@Document(collection = "roles") 
 public class Role {
 
     @Id
-    private String id; // ObjectId de MongoDB
+    private String id; 
 
-    @Indexed(unique = true) // El nombre del rol debe ser único
+    @Indexed(unique = true) 
     @Field("name")
-    private String name; // Ej: "ROLE_USER", "ROLE_ADMIN", "ROLE_SUPERADMIN"
-
-    // Podrías añadir más campos en el futuro, como permisos:
-    // private Set<String> permissions;
+    private String name; 
 }
