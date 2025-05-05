@@ -54,8 +54,8 @@ public class User {
     @Field("credentials_non_expired")
     private boolean credentialsNonExpired;
 
-    @DBRef(lazy = true) // Carga perezosa para mejor rendimiento
-    @Builder.Default // Para inicializar con @Builder
+    @DBRef(lazy = true)
+    @Builder.Default 
     @Field("roles")
-    private Set<Role> roles = new HashSet<>(); // Ahora es Set<Role>, no Set<String>
+    private Set<Role> roles = new HashSet<>(); 
 }
