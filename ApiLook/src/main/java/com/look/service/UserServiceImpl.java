@@ -1,11 +1,11 @@
-// src/main/java/com/look/service/UserServiceImpl.java
+
 package com.look.service;
 
-// Mismos imports que antes...
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.crypto.password.PasswordEncoder; // Importar si se añade cambio de pass
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import com.look.dto.UserResponseDto;
@@ -26,8 +26,8 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-@Service // La anotación @Service va en la implementación
-public class UserServiceImpl implements UserService { // Implementa la interfaz
+@Service 
+public class UserServiceImpl implements UserService { 
 
     @Autowired
     UserRepository userRepository;
@@ -36,12 +36,12 @@ public class UserServiceImpl implements UserService { // Implementa la interfaz
     UserMapper userMapper;
 
     @Autowired
-    PasswordEncoder passwordEncoder; // Necesario si implementas cambio de contraseña
+    PasswordEncoder passwordEncoder; 
     
     @Autowired 
     RoleRepository roleRepository;
 
-     // --- Helper Methods (permanecen privados en la implementación) ---
+     // --- Helper Methods ---
     private User getCurrentAuthenticatedUser() {
          Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
          if (authentication == null || !authentication.isAuthenticated() || "anonymousUser".equals(authentication.getPrincipal())) {
@@ -52,22 +52,22 @@ public class UserServiceImpl implements UserService { // Implementa la interfaz
                  .orElseThrow(() -> new ResourceNotFoundException("Authenticated user not found in database: " + username));
     }
 
-    // --- Public Service Methods (ahora con @Override) ---
+    // --- Public Service Methods ---
 
-    @Override // Añade @Override
+    @Override
     public UserResponseDto getUserProfile(String userId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + userId));
         return userMapper.userToUserResponseDto(user);
     }
 
-    @Override // Añade @Override
+    @Override
     public UserResponseDto getMyProfile() {
         User currentUser = getCurrentAuthenticatedUser();
         return userMapper.userToUserResponseDto(currentUser);
     }
 
-    @Override // Añade @Override
+    @Override
     @Transactional
     public UserResponseDto updateMyProfile(UserUpdateRequestDto userUpdateRequestDto) {
         User currentUser = getCurrentAuthenticatedUser();
@@ -88,7 +88,7 @@ public class UserServiceImpl implements UserService { // Implementa la interfaz
         return userMapper.userToUserResponseDto(updatedUser);
     }
 
-    @Override // Añade @Override
+    @Override
     public List<UserResponseDto> getAllUsers() {
         List<User> users = userRepository.findAll();
         return users.stream()
@@ -96,18 +96,16 @@ public class UserServiceImpl implements UserService { // Implementa la interfaz
                 .collect(Collectors.toList());
     }
 
-    @Override // Añade @Override
+    @Override
     @Transactional
     public UserResponseDto updateUserRoles(String userId, UserRoleUpdateRequestDto roleUpdateRequestDto) {
         User user = userRepository.findById(userId)
                  .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + userId));
 
-     // --- CAMBIO AQUÍ ---
-        // Buscar los objetos Role correspondientes a los nombres recibidos
+     
         Set<String> requestedRoleNames = roleUpdateRequestDto.getRoles();
         Set<Role> newRoles = roleRepository.findByNameIn(requestedRoleNames);
 
-        // Validar si todos los roles solicitados fueron encontrados
         if (newRoles.size() != requestedRoleNames.size()) {
              Set<String> foundNames = newRoles.stream().map(Role::getName).collect(Collectors.toSet());
              requestedRoleNames.removeAll(foundNames); // Nombres que no se encontraron
@@ -119,7 +117,7 @@ public class UserServiceImpl implements UserService { // Implementa la interfaz
         return userMapper.userToUserResponseDto(updatedUser);
     }
 
-    @Override // Añade @Override
+    @Override
     @Transactional
     public void deleteUser(String userId) {
         User currentUser = getCurrentAuthenticatedUser();
@@ -130,12 +128,11 @@ public class UserServiceImpl implements UserService { // Implementa la interfaz
             throw new BadRequestException("Cannot delete your own account using this endpoint.");
         }
 
-        // Considerar borrar contenido asociado si es necesario
 
         userRepository.deleteById(userId);
     }
 
-    @Override // Añade @Override
+    @Override
     @Transactional
      public UserResponseDto setUserEnabledStatus(String userId, UserStatusUpdateDto statusUpdateDto) {
         User user = userRepository.findById(userId)

@@ -8,7 +8,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional; // Importante si haces operaciones complejas
+import org.springframework.transaction.annotation.Transactional; 
 
 import com.look.entity.User;
 import com.look.repository.UserRepository;
@@ -29,7 +29,7 @@ public class UserDetailsServiceImpl implements UserDetailsService {
                 .orElseThrow(() -> new UsernameNotFoundException("User Not Found with username: " + username));
 
         Set<GrantedAuthority> authorities = user.getRoles().stream()
-                .map(role -> new SimpleGrantedAuthority(role.getName())) // Obtener el nombre del objeto Role
+                .map(role -> new SimpleGrantedAuthority(role.getName())) 
                 .collect(Collectors.toSet());
 
         return new org.springframework.security.core.userdetails.User(

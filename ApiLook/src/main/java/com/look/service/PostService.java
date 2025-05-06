@@ -1,4 +1,4 @@
-// src/main/java/com/look/service/PostService.java
+
 package com.look.service;
 
 import com.look.dto.PostRequestDto;

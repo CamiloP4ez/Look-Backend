@@ -1,7 +1,6 @@
-// src/main/java/com/look/service/PostServiceImpl.java
+
 package com.look.service;
 
-// Mismos imports que antes...
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -24,8 +23,8 @@ import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
-@Service // La anotación @Service va en la implementación
-public class PostServiceImpl implements PostService { // Implementa la interfaz
+@Service /
+public class PostServiceImpl implements PostService { 
 
     @Autowired
     PostRepository postRepository;
@@ -39,7 +38,7 @@ public class PostServiceImpl implements PostService { // Implementa la interfaz
     @Autowired
     PostMapper postMapper;
 
-    // --- Helper Methods (permanecen privados en la implementación) ---
+    // --- Helper Methods ---
     private User getCurrentAuthenticatedUser() {
          Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
          if (authentication == null || !authentication.isAuthenticated() || "anonymousUser".equals(authentication.getPrincipal())) {
@@ -51,12 +50,9 @@ public class PostServiceImpl implements PostService { // Implementa la interfaz
     }
 
     private boolean isAdminOrSuperAdmin(User user) {
-        // Verifica si el Set<Role> no es nulo o vacío para evitar NullPointerException
         if (user.getRoles() == null || user.getRoles().isEmpty()) {
             return false;
         }
-        // Usa un stream para iterar sobre los objetos Role
-        // y anyMatch para ver si alguno cumple la condición
         return user.getRoles().stream()
                 .anyMatch(role -> role.getName().equals("ROLE_ADMIN") ||
                                  role.getName().equals("ROLE_SUPERADMIN"));
@@ -65,14 +61,12 @@ public class PostServiceImpl implements PostService { // Implementa la interfaz
      private PostResponseDto enrichPostResponse(PostResponseDto dto) {
         long likeCount = likeRepository.countByPostId(dto.getId());
         dto.setLikeCount(likeCount);
-        // Aquí podrías añadir info del autor si el DTO lo requiere
-        // userRepository.findById(dto.getUserId()).ifPresent(author -> dto.setAuthorUsername(author.getUsername()));
         return dto;
     }
 
-    // --- Public Service Methods (ahora con @Override) ---
+    // --- Public Service Methods ---
 
-    @Override // Añade @Override
+    @Override 
     @Transactional
     public PostResponseDto createPost(PostRequestDto postRequestDto) {
         User currentUser = getCurrentAuthenticatedUser();
@@ -83,7 +77,7 @@ public class PostServiceImpl implements PostService { // Implementa la interfaz
         return enrichPostResponse(postMapper.postToPostResponseDto(savedPost));
     }
 
-    @Override // Añade @Override
+    @Override 
     public List<PostResponseDto> getAllPosts() {
         return postRepository.findAll().stream()
                 .map(postMapper::postToPostResponseDto)
@@ -91,14 +85,14 @@ public class PostServiceImpl implements PostService { // Implementa la interfaz
                 .collect(Collectors.toList());
     }
 
-    @Override // Añade @Override
+    @Override 
      public PostResponseDto getPostById(String postId) {
         Post post = postRepository.findById(postId)
                 .orElseThrow(() -> new ResourceNotFoundException("Post not found with id: " + postId));
         return enrichPostResponse(postMapper.postToPostResponseDto(post));
     }
 
-    @Override // Añade @Override
+    @Override 
     @Transactional
     public PostResponseDto updatePost(String postId, PostRequestDto postRequestDto) {
         User currentUser = getCurrentAuthenticatedUser();
@@ -114,7 +108,7 @@ public class PostServiceImpl implements PostService { // Implementa la interfaz
         return enrichPostResponse(postMapper.postToPostResponseDto(updatedPost));
     }
 
-    @Override // Añade @Override
+    @Override 
     @Transactional
     public void deletePost(String postId) {
         User currentUser = getCurrentAuthenticatedUser();
@@ -125,16 +119,15 @@ public class PostServiceImpl implements PostService { // Implementa la interfaz
             throw new UnauthorizedException("User not authorized to delete this post");
         }
 
-        // Considerar borrar likes y comentarios asociados si es necesario
         // likeRepository.deleteByPostId(postId);
         // commentRepository.deleteByPostId(postId);
 
         postRepository.deleteById(postId);
     }
 
-    // --- Lógica para Likes (ahora con @Override) ---
+    // --- Lógica para Likes ---
 
-    @Override // Añade @Override
+    @Override 
     @Transactional
     public void likePost(String postId) {
         User currentUser = getCurrentAuthenticatedUser();
@@ -153,7 +146,7 @@ public class PostServiceImpl implements PostService { // Implementa la interfaz
         likeRepository.save(like);
     }
 
-    @Override // Añade @Override
+    @Override 
     @Transactional
     public void unlikePost(String postId) {
          User currentUser = getCurrentAuthenticatedUser();
