@@ -15,4 +15,6 @@ public class UserResponseDto {
     private Date createdAt;
     private Set<String> roles;
     private boolean enabled;
+    private long followersCount;
+    private long followingCount;
 }

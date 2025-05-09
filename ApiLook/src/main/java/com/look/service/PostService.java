@@ -21,4 +21,6 @@ public interface PostService {
     void likePost(String postId);
 
     void unlikePost(String postId);
+
+    List<PostResponseDto> getPostsByUserId(String userId);
 }

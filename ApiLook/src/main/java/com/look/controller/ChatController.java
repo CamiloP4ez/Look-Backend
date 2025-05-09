@@ -1,6 +1,5 @@
 package com.look.controller;
 
-
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -25,21 +24,21 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/v1/chats")
 @Tag(name = "Chats", description = "Operations related to chats and messages")
-@SecurityRequirement(name = "bearerAuth") // Todas las operaciones de chat requieren autenticación
-@PreAuthorize("isAuthenticated()") // Aplicar a nivel de clase ya que todo requiere auth
+@SecurityRequirement(name = "bearerAuth")
+@PreAuthorize("isAuthenticated()")
 public class ChatController {
 
     @Autowired
-    ChatService  chatService;
+    ChatService chatService;
 
     @Operation(summary = "Get or Create a chat with another user", description = "Finds an existing chat or creates a new one.")
     @PostMapping(value = "/findOrCreate", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<ApiResponseDto <ChatResponseDto >> getOrCreateChat(
-            @Valid @RequestBody ChatCreateRequestDto  createRequestDto) {
+    public ResponseEntity<ApiResponseDto<ChatResponseDto>> getOrCreateChat(
+            @Valid @RequestBody ChatCreateRequestDto createRequestDto) {
         ChatResponseDto chat = chatService.getOrCreateChat(createRequestDto);
-        // Determinar si fue creado o encontrado para el mensaje/código (opcional)
-        // Por simplicidad, siempre devolvemos OK aquí
-        ApiResponseDto<ChatResponseDto> response = new ApiResponseDto<>("Chat retrieved or created successfully", HttpStatus.OK.value(), chat);
+
+        ApiResponseDto<ChatResponseDto> response = new ApiResponseDto<>("Chat retrieved or created successfully",
+                HttpStatus.OK.value(), chat);
         return ResponseEntity.ok(response);
     }
 
@@ -47,17 +46,19 @@ public class ChatController {
     @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<ApiResponseDto<List<ChatResponseDto>>> getMyChats() {
         List<ChatResponseDto> chats = chatService.getMyChats();
-        ApiResponseDto<List<ChatResponseDto>> response = new ApiResponseDto<>("Chats fetched successfully", HttpStatus.OK.value(), chats);
+        ApiResponseDto<List<ChatResponseDto>> response = new ApiResponseDto<>("Chats fetched successfully",
+                HttpStatus.OK.value(), chats);
         return ResponseEntity.ok(response);
     }
 
     @Operation(summary = "Send a message in a chat", description = "Adds a message to the specified chat.")
     @PostMapping(value = "/{chatId}/messages", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<ApiResponseDto<MessageDto >> sendMessage(
+    public ResponseEntity<ApiResponseDto<MessageDto>> sendMessage(
             @Parameter(description = "ID of the chat to send the message to", required = true) @PathVariable String chatId,
-            @Valid @RequestBody MessageRequestDto  messageRequestDto) {
+            @Valid @RequestBody MessageRequestDto messageRequestDto) {
         MessageDto sentMessage = chatService.sendMessage(chatId, messageRequestDto);
-        ApiResponseDto<MessageDto> response = new ApiResponseDto<>("Message sent successfully", HttpStatus.CREATED.value(), sentMessage);
+        ApiResponseDto<MessageDto> response = new ApiResponseDto<>("Message sent successfully",
+                HttpStatus.CREATED.value(), sentMessage);
         return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
 
@@ -66,7 +67,8 @@ public class ChatController {
     public ResponseEntity<ApiResponseDto<List<MessageDto>>> getChatMessages(
             @Parameter(description = "ID of the chat whose messages are to be retrieved", required = true) @PathVariable String chatId) {
         List<MessageDto> messages = chatService.getChatMessages(chatId);
-         ApiResponseDto<List<MessageDto>> response = new ApiResponseDto<>("Messages fetched successfully", HttpStatus.OK.value(), messages);
+        ApiResponseDto<List<MessageDto>> response = new ApiResponseDto<>("Messages fetched successfully",
+                HttpStatus.OK.value(), messages);
         return ResponseEntity.ok(response);
     }
 }

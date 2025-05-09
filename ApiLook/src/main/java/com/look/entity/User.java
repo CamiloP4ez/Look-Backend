@@ -1,6 +1,5 @@
 package com.look.entity;
 
-
 import lombok.Data;
 import lombok.Builder;
 import lombok.NoArgsConstructor;
@@ -22,18 +21,18 @@ import java.util.Set;
 public class User {
 
     @Id
-    private String id; 
+    private String id;
 
     @Indexed(unique = true)
     @Field("username")
     private String username;
 
-    @Indexed(unique = true) 
+    @Indexed(unique = true)
     @Field("email")
     private String email;
 
-    @Field("password_hash") 
-    private String password; 
+    @Field("password_hash")
+    private String password;
 
     @Field("profile_picture_uri")
     private String profilePictureUri;
@@ -41,7 +40,6 @@ public class User {
     @Field("created_at")
     private Date createdAt;
 
-    
     @Field("enabled")
     private boolean enabled;
 
@@ -55,7 +53,17 @@ public class User {
     private boolean credentialsNonExpired;
 
     @DBRef(lazy = true)
-    @Builder.Default 
+    @Builder.Default
     @Field("roles")
-    private Set<Role> roles = new HashSet<>(); 
+    private Set<Role> roles = new HashSet<>();
+
+    @DBRef(lazy = true)
+    @Builder.Default
+    @Field("following")
+    private Set<User> following = new HashSet<>();
+
+    @DBRef(lazy = true)
+    @Builder.Default
+    @Field("followers")
+    private Set<User> followers = new HashSet<>();
 }

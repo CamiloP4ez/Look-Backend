@@ -1,7 +1,5 @@
 package com.look.controller;
 
-
-
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -26,7 +24,6 @@ import com.look.entity.User;
 import com.look.mapper.UserMapper;
 import com.look.service.AuthService;
 
-
 @RestController
 @RequestMapping("/api/auth")
 @Tag(name = "Authentication", description = "Endpoints for user authentication and registration")
@@ -36,16 +33,17 @@ public class AuthController {
     AuthService authService;
 
     @Autowired
-    UserMapper userMapper; // Para mapear la respuesta del registro
-
+    UserMapper userMapper;
 
     @Operation(summary = "Login user", description = "Authenticates a user and returns a JWT token.")
     @ApiResponse(responseCode = "200", description = "Login successful")
     @ApiResponse(responseCode = "401", description = "Invalid credentials")
     @PostMapping(value = "/login", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<ApiResponseDto<AuthResponseDto>> authenticateUser(@Valid @RequestBody AuthLoginRequestDto loginRequest) {
+    public ResponseEntity<ApiResponseDto<AuthResponseDto>> authenticateUser(
+            @Valid @RequestBody AuthLoginRequestDto loginRequest) {
         AuthResponseDto authResponse = authService.loginUser(loginRequest);
-        ApiResponseDto<AuthResponseDto> response = new ApiResponseDto<>("User logged in successfully", HttpStatus.OK.value(), authResponse);
+        ApiResponseDto<AuthResponseDto> response = new ApiResponseDto<>("User logged in successfully",
+                HttpStatus.OK.value(), authResponse);
         return ResponseEntity.ok(response);
     }
 
@@ -53,10 +51,12 @@ public class AuthController {
     @ApiResponse(responseCode = "201", description = "User registered successfully")
     @ApiResponse(responseCode = "400", description = "Invalid input or username/email already exists")
     @PostMapping(value = "/register", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<ApiResponseDto<UserResponseDto>> registerUser(@Valid @RequestBody AuthRegisterRequestDto registerRequest) throws BadRequestException {
+    public ResponseEntity<ApiResponseDto<UserResponseDto>> registerUser(
+            @Valid @RequestBody AuthRegisterRequestDto registerRequest) throws BadRequestException {
         User registeredUser = authService.registerUser(registerRequest);
-        UserResponseDto userResponseDto = userMapper.userToUserResponseDto(registeredUser); // Mapear a DTO de respuesta
-        ApiResponseDto<UserResponseDto> response = new ApiResponseDto<>("User registered successfully", HttpStatus.CREATED.value(), userResponseDto);
+        UserResponseDto userResponseDto = userMapper.userToUserResponseDto(registeredUser);
+        ApiResponseDto<UserResponseDto> response = new ApiResponseDto<>("User registered successfully",
+                HttpStatus.CREATED.value(), userResponseDto);
         return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
 }
