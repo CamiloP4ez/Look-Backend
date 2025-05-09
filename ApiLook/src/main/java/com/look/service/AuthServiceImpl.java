@@ -1,7 +1,7 @@
 
 package com.look.service;
 
-import org.apache.coyote.BadRequestException; 
+import com.look.exception.BadRequestException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -27,8 +27,8 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-@Service 
-public class AuthServiceImpl implements AuthService { 
+@Service
+public class AuthServiceImpl implements AuthService {
 
     @Autowired
     AuthenticationManager authenticationManager;
@@ -44,11 +44,11 @@ public class AuthServiceImpl implements AuthService {
 
     @Autowired
     UserMapper userMapper;
-    
+
     @Autowired
     RoleRepository roleRepository;
 
-    @Override 
+    @Override
     @Transactional
     public AuthResponseDto loginUser(AuthLoginRequestDto loginRequest) {
         try {
@@ -60,8 +60,7 @@ public class AuthServiceImpl implements AuthService {
 
             UserDetails userDetails = (UserDetails) authentication.getPrincipal();
             User user = userRepository.findByUsername(userDetails.getUsername()).orElseThrow(
-                 () -> new BadCredentialsException("User details not found after authentication") 
-            );
+                    () -> new BadCredentialsException("User details not found after authentication"));
 
             Set<String> roleNames = user.getRoles().stream()
                     .map(Role::getName)
@@ -74,9 +73,9 @@ public class AuthServiceImpl implements AuthService {
         }
     }
 
-    @Override 
+    @Override
     @Transactional
-    public User registerUser(AuthRegisterRequestDto registerRequest) throws BadRequestException { 
+    public User registerUser(AuthRegisterRequestDto registerRequest) throws BadRequestException {
         if (userRepository.existsByUsername(registerRequest.getUsername())) {
             throw new BadRequestException("Error: Username is already taken!");
         }
@@ -93,12 +92,12 @@ public class AuthServiceImpl implements AuthService {
         user.setAccountNonLocked(true);
         user.setCredentialsNonExpired(true);
 
-        
         Role userRole = roleRepository.findByName("ROLE_USER")
-                .orElseThrow(() -> new InternalServerErrorException("Error: Default role ROLE_USER not found. Database seeding might be required.")); // El seeder debe asegurar que exista
+                .orElseThrow(() -> new InternalServerErrorException(
+                        "Error: Default role ROLE_USER not found. Database seeding might be required."));
 
         Set<Role> roles = new HashSet<>();
-        roles.add(userRole); 
+        roles.add(userRole);
         user.setRoles(roles);
 
         return userRepository.save(user);
