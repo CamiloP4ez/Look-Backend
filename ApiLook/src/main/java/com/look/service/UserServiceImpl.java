@@ -21,6 +21,7 @@ import com.look.mapper.UserMapper;
 import com.look.repository.RoleRepository;
 import com.look.repository.UserRepository;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -152,5 +153,74 @@ public class UserServiceImpl implements UserService {
 
         User updatedUser = userRepository.save(user);
         return userMapper.userToUserResponseDto(updatedUser);
+    }
+    @Override
+    @Transactional
+    public void followUser(String userIdToFollow) {
+        User currentUser = getCurrentAuthenticatedUser();
+        User userToFollow = userRepository.findById(userIdToFollow)
+                .orElseThrow(() -> new ResourceNotFoundException("User to follow not found with id: " + userIdToFollow));
+
+        if (currentUser.getId().equals(userIdToFollow)) {
+            throw new BadRequestException("You cannot follow yourself.");
+        }
+
+        if (currentUser.getFollowing().stream().anyMatch(u -> u.getId().equals(userIdToFollow))) {
+            throw new BadRequestException("You are already following this user.");
+        }
+
+        currentUser.getFollowing().add(userToFollow);
+        userToFollow.getFollowers().add(currentUser);
+
+        userRepository.save(currentUser);
+        userRepository.save(userToFollow);
+    }
+
+    @Override
+    @Transactional
+    public void unfollowUser(String userIdToUnfollow) {
+        User currentUser = getCurrentAuthenticatedUser();
+        User userToUnfollow = userRepository.findById(userIdToUnfollow)
+                .orElseThrow(() -> new ResourceNotFoundException("User to unfollow not found with id: " + userIdToUnfollow));
+
+        if (currentUser.getId().equals(userIdToUnfollow)) {
+            throw new BadRequestException("You cannot unfollow yourself.");
+        }
+
+        boolean removedFromFollowing = currentUser.getFollowing().removeIf(u -> u.getId().equals(userIdToUnfollow));
+        boolean removedFromFollowers = userToUnfollow.getFollowers().removeIf(u -> u.getId().equals(currentUser.getId()));
+
+        if (!removedFromFollowing) {
+            throw new BadRequestException("You are not following this user.");
+        }
+
+        userRepository.save(currentUser);
+        userRepository.save(userToUnfollow);
+    }
+
+    @Override
+    public List<UserResponseDto> getFollowers(String userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + userId));
+
+        if (user.getFollowers() == null || user.getFollowers().isEmpty()) {
+            return Collections.emptyList();
+        }
+        return user.getFollowers().stream()
+                .map(userMapper::userToUserResponseDto)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<UserResponseDto> getFollowing(String userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + userId));
+        
+        if (user.getFollowing() == null || user.getFollowing().isEmpty()) {
+            return Collections.emptyList();
+        }
+        return user.getFollowing().stream()
+                .map(userMapper::userToUserResponseDto)
+                .collect(Collectors.toList());
     }
 }

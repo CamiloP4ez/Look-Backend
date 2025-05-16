@@ -23,4 +23,9 @@ public interface UserService {
     void deleteUser(String userId);
 
     UserResponseDto setUserEnabledStatus(String userId, UserStatusUpdateDto statusUpdateDto);
+    
+    void followUser(String userIdToFollow);
+    void unfollowUser(String userIdToUnfollow);
+    List<UserResponseDto> getFollowers(String userId);
+    List<UserResponseDto> getFollowing(String userId);
 }

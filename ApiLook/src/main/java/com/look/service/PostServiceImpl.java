@@ -10,7 +10,6 @@ import com.look.dto.PostRequestDto;
 import com.look.dto.PostResponseDto;
 import com.look.entity.Like;
 import com.look.entity.Post;
-import com.look.entity.Role;
 import com.look.entity.User;
 import com.look.exception.BadRequestException;
 import com.look.exception.ResourceNotFoundException;
@@ -23,6 +22,7 @@ import com.look.repository.UserRepository;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -182,5 +182,27 @@ public class PostServiceImpl implements PostService {
         Like like = likeRepository.findByPostIdAndUserId(postId, currentUser.getId())
                 .orElseThrow(() -> new ResourceNotFoundException("Like not found for this user and post"));
         likeRepository.delete(like);
+    }
+    @Override
+    public List<PostResponseDto> getFeedForCurrentUser() {
+        User currentUser = getCurrentAuthenticatedUser();
+        Set<User> followedUsers = currentUser.getFollowing();
+
+        if (followedUsers == null || followedUsers.isEmpty()) {
+            return Collections.emptyList();
+        }
+
+        Set<String> followedUserIds = followedUsers.stream()
+                                                .map(User::getId)
+                                                .collect(Collectors.toSet());
+        followedUserIds.add(currentUser.getId());
+
+
+        List<Post> feedPosts = postRepository.findByUserIdInOrderByCreatedAtDesc(followedUserIds);
+
+        return feedPosts.stream()
+                        .map(postMapper::postToPostResponseDto)
+                        .map(this::enrichPostResponse)
+                        .collect(Collectors.toList());
     }
 }

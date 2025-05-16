@@ -23,4 +23,6 @@ public interface PostService {
     void unlikePost(String postId);
 
     List<PostResponseDto> getPostsByUserId(String userId);
+    
+    List<PostResponseDto> getFeedForCurrentUser();
 }
