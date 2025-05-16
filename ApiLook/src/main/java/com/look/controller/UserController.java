@@ -33,7 +33,6 @@ public class UserController {
 
     @Autowired
     UserService userService;
-
     @Autowired
     PostService postService;
 
@@ -122,5 +121,53 @@ public class UserController {
             @Parameter(description = "ID of the user to delete", required = true) @PathVariable String userId) {
         userService.deleteUser(userId);
         return ResponseEntity.noContent().build();
+    }
+    @Operation(summary = "Follow a user", description = "Requires authentication. Current user follows the user specified by userIdToFollow.")
+    @PostMapping("/{userIdToFollow}/follow")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<ApiResponseDto<Void>> followUser(
+            @Parameter(description = "ID of the user to follow", required = true) @PathVariable String userIdToFollow) {
+        userService.followUser(userIdToFollow);
+        ApiResponseDto<Void> response = new ApiResponseDto<>("User followed successfully", HttpStatus.OK.value());
+        return ResponseEntity.ok(response);
+    }
+
+    @Operation(summary = "Unfollow a user", description = "Requires authentication. Current user unfollows the user specified by userIdToUnfollow.")
+    @DeleteMapping("/{userIdToUnfollow}/follow")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<ApiResponseDto<Void>> unfollowUser(
+            @Parameter(description = "ID of the user to unfollow", required = true) @PathVariable String userIdToUnfollow) {
+        userService.unfollowUser(userIdToUnfollow);
+        ApiResponseDto<Void> response = new ApiResponseDto<>("User unfollowed successfully", HttpStatus.OK.value());
+        return ResponseEntity.ok(response);
+    }
+
+    @Operation(summary = "Get a user's followers", description = "Requires authentication. Lists users who follow the user specified by userId.")
+    @GetMapping("/{userId}/followers")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<ApiResponseDto<List<UserResponseDto>>> getFollowers(
+            @Parameter(description = "ID of the user whose followers to list", required = true) @PathVariable String userId) {
+        List<UserResponseDto> followers = userService.getFollowers(userId);
+        ApiResponseDto<List<UserResponseDto>> response = new ApiResponseDto<>("Followers fetched successfully", HttpStatus.OK.value(), followers);
+        return ResponseEntity.ok(response);
+    }
+
+    @Operation(summary = "Get users a user is following", description = "Requires authentication. Lists users whom the user specified by userId is following.")
+    @GetMapping("/{userId}/following")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<ApiResponseDto<List<UserResponseDto>>> getFollowing(
+            @Parameter(description = "ID of the user whose following list to retrieve", required = true) @PathVariable String userId) {
+        List<UserResponseDto> following = userService.getFollowing(userId);
+        ApiResponseDto<List<UserResponseDto>> response = new ApiResponseDto<>("Following list fetched successfully", HttpStatus.OK.value(), following);
+        return ResponseEntity.ok(response);
+    }
+
+    @Operation(summary = "Get a personalized feed for the current user", description = "Requires authentication. Shows posts from users the current user is following.")
+    @GetMapping("/me/feed")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<ApiResponseDto<List<PostResponseDto>>> getCurrentUserFeed() {
+        List<PostResponseDto> feedPosts = postService.getFeedForCurrentUser();
+        ApiResponseDto<List<PostResponseDto>> response = new ApiResponseDto<>("Feed fetched successfully", HttpStatus.OK.value(), feedPosts);
+        return ResponseEntity.ok(response);
     }
 }
