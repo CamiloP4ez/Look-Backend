@@ -6,9 +6,11 @@ import org.springframework.stereotype.Repository;
 
 import com.look.entity.Post;
 
+import java.util.Collection;
 import java.util.List;
 
 @Repository
 public interface PostRepository extends MongoRepository<Post, String> {
     List<Post> findByUserIdOrderByCreatedAtDesc(String userId);
+    List<Post> findByUserIdInOrderByCreatedAtDesc(Collection<String> userIds);
 }
