@@ -104,7 +104,7 @@ public class SecurityConfig {
 
                         .requestMatchers(HttpMethod.GET, "/api/v1/users/me").authenticated()
 
-                        .requestMatchers(HttpMethod.GET, "/api/v1/users/{userId}").hasAnyRole("ADMIN", "SUPERADMIN")
+                        .requestMatchers(HttpMethod.GET, "/api/v1/users/{userId}").permitAll()
 
                         .requestMatchers(HttpMethod.PUT, "/api/v1/users/me").authenticated()
 
