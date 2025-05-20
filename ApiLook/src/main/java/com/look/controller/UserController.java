@@ -58,8 +58,7 @@ public class UserController {
     }
 
     @Operation(summary = "Get all users", description = "Requires ADMIN or SUPERADMIN role.")
-    @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
-    @PreAuthorize("hasAnyRole('ADMIN', 'SUPERADMIN')")
+    @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)	
     public ResponseEntity<ApiResponseDto<List<UserResponseDto>>> getAllUsers() {
         List<UserResponseDto> users = userService.getAllUsers();
         ApiResponseDto<List<UserResponseDto>> response = new ApiResponseDto<>("Users fetched successfully",
