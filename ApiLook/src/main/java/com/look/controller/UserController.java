@@ -67,9 +67,8 @@ public class UserController {
         return ResponseEntity.ok(response);
     }
 
-    @Operation(summary = "Get user profile by ID", description = "Requires ADMIN or SUPERADMIN role.")
+    @Operation(summary = "Get user profile by ID", description = "")
     @GetMapping(value = "/{userId}", produces = MediaType.APPLICATION_JSON_VALUE)
-    @PreAuthorize("hasAnyRole('ADMIN', 'SUPERADMIN')")
     public ResponseEntity<ApiResponseDto<UserResponseDto>> getUserById(
             @Parameter(description = "ID of the user to retrieve", required = true) @PathVariable String userId) {
         UserResponseDto userProfile = userService.getUserProfile(userId);

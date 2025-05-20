@@ -17,8 +17,10 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import com.look.dto.ApiResponseDto;
+import com.look.dto.LikeResponseDto;
 import com.look.dto.PostRequestDto;
 import com.look.dto.PostResponseDto;
+import com.look.entity.Like;
 import com.look.service.PostService;
 
 import java.util.List;
@@ -117,6 +119,17 @@ public class PostController {
             @Parameter(description = "ID of the post to unlike", required = true) @PathVariable String postId) {
         postService.unlikePost(postId);
         ApiResponseDto<Void> response = new ApiResponseDto<>("Post unliked successfully", HttpStatus.OK.value());
+        return ResponseEntity.ok(response);
+    }
+    @Operation(summary = "Get all likes for a post", description = "Requires authentication")
+    @ApiResponse(responseCode = "200", description = "Likes fetched successfully")
+    @GetMapping("/{postId}/likes")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<ApiResponseDto<List<LikeResponseDto>>> getLikesForPost(
+            @Parameter(description = "ID of the post", required = true) @PathVariable String postId) {
+
+        List<LikeResponseDto> likes = postService.getLikesForPost(postId);
+        ApiResponseDto<List<LikeResponseDto>> response = new ApiResponseDto<>("Likes fetched successfully", HttpStatus.OK.value(), likes);
         return ResponseEntity.ok(response);
     }
 

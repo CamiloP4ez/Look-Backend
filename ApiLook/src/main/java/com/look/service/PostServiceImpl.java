@@ -6,6 +6,8 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import com.look.dto.LikeResponseDto;
 import com.look.dto.PostRequestDto;
 import com.look.dto.PostResponseDto;
 import com.look.entity.Like;
@@ -14,6 +16,7 @@ import com.look.entity.User;
 import com.look.exception.BadRequestException;
 import com.look.exception.ResourceNotFoundException;
 import com.look.exception.UnauthorizedException;
+import com.look.mapper.LikeMapper;
 import com.look.mapper.PostMapper;
 import com.look.repository.LikeRepository;
 import com.look.repository.PostRepository;
@@ -36,9 +39,13 @@ public class PostServiceImpl implements PostService {
 
     @Autowired
     LikeRepository likeRepository;
+    
+    @Autowired
+    LikeMapper likeMapper;
 
     @Autowired
     PostMapper postMapper;
+    
 
     private User getCurrentAuthenticatedUser() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -204,5 +211,11 @@ public class PostServiceImpl implements PostService {
                         .map(postMapper::postToPostResponseDto)
                         .map(this::enrichPostResponse)
                         .collect(Collectors.toList());
+    }
+    @Override
+    public List<LikeResponseDto> getLikesForPost(String postId) {
+        return likeRepository.findByPostId(postId).stream()
+            .map(likeMapper::likeToLikeResponseDto)
+            .collect(Collectors.toList());
     }
 }

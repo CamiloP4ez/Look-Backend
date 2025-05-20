@@ -1,8 +1,10 @@
 
 package com.look.service;
 
+import com.look.dto.LikeResponseDto;
 import com.look.dto.PostRequestDto;
 import com.look.dto.PostResponseDto;
+import com.look.entity.Like;
 
 import java.util.List;
 
@@ -25,4 +27,6 @@ public interface PostService {
     List<PostResponseDto> getPostsByUserId(String userId);
     
     List<PostResponseDto> getFeedForCurrentUser();
+    
+    List<LikeResponseDto> getLikesForPost(String postId);
 }

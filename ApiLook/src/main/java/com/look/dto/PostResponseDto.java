@@ -9,7 +9,8 @@ import java.util.Date;
 @NoArgsConstructor
 public class PostResponseDto {
     private String id;
-    private String userId; // ID del autor
+    private String userId;
+    private String username;
     private String title;
     private String content;
     private String imageUri;
