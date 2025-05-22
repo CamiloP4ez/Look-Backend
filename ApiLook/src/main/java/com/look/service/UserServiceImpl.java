@@ -3,6 +3,7 @@ package com.look.service;
 
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -26,7 +27,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
-
+import org.springframework.security.core.userdetails.UserDetails;
+import com.look.service.UserDetailsServiceImpl;
 @Service 
 public class UserServiceImpl implements UserService { 
 
@@ -41,6 +43,9 @@ public class UserServiceImpl implements UserService {
     
     @Autowired 
     RoleRepository roleRepository;
+    
+    @Autowired
+    private UserDetailsServiceImpl userDetailsService;
 
      // --- Helper Methods ---
     private User getCurrentAuthenticatedUser() {
@@ -72,22 +77,47 @@ public class UserServiceImpl implements UserService {
     @Transactional
     public UserResponseDto updateMyProfile(UserUpdateRequestDto userUpdateRequestDto) {
         User currentUser = getCurrentAuthenticatedUser();
+        String originalUsername = currentUser.getUsername(); // Username antes del cambio
 
+        
         if (userUpdateRequestDto.getUsername() != null && !userUpdateRequestDto.getUsername().equals(currentUser.getUsername())) {
             if (userRepository.existsByUsername(userUpdateRequestDto.getUsername())) {
                 throw new BadRequestException("Username is already taken!");
             }
+            
         }
         if (userUpdateRequestDto.getEmail() != null && !userUpdateRequestDto.getEmail().equals(currentUser.getEmail())) {
              if (userRepository.existsByEmail(userUpdateRequestDto.getEmail())) {
                 throw new BadRequestException("Email is already in use!");
             }
+            
         }
 
-        userMapper.updateUserFromDto(userUpdateRequestDto, currentUser);
-        User updatedUser = userRepository.save(currentUser);
+        userMapper.updateUserFromDto(userUpdateRequestDto, currentUser); // Aplica los cambios del DTO
+        User updatedUser = userRepository.save(currentUser); // Guarda en la DB
+
+        
+        boolean usernameActuallyChanged = userUpdateRequestDto.getUsername() != null &&
+                                          !updatedUser.getUsername().equals(originalUsername);
+
+        if (usernameActuallyChanged) {
+
+            UserDetails updatedUserDetails = userDetailsService.loadUserByUsername(updatedUser.getUsername());
+            UsernamePasswordAuthenticationToken newAuthentication = new UsernamePasswordAuthenticationToken(
+                    updatedUserDetails, null, updatedUserDetails.getAuthorities());
+            
+            Object originalDetails = SecurityContextHolder.getContext().getAuthentication().getDetails();
+            if (originalDetails != null) {
+                newAuthentication.setDetails(originalDetails);
+            }
+            
+            SecurityContextHolder.getContext().setAuthentication(newAuthentication);
+            
+        } 
+
         return userMapper.userToUserResponseDto(updatedUser);
     }
+
 
     @Override
     public List<UserResponseDto> getAllUsers() {

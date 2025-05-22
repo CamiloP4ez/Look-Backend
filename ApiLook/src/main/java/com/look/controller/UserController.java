@@ -20,8 +20,15 @@ import com.look.dto.UserResponseDto;
 import com.look.dto.UserRoleUpdateRequestDto;
 import com.look.dto.UserStatusUpdateDto;
 import com.look.dto.UserUpdateRequestDto;
+import com.look.jwt.JwtTokenProvider;
 import com.look.service.PostService;
 import com.look.service.UserService;
+import com.look.jwt.JwtTokenProvider;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+
+import com.look.dto.AuthResponseDto; 
+import java.util.stream.Collectors; 
 
 import java.util.List;
 
@@ -35,6 +42,8 @@ public class UserController {
     UserService userService;
     @Autowired
     PostService postService;
+    @Autowired
+    private JwtTokenProvider tokenProvider;
 
     @Operation(summary = "Get current user's profile", description = "Requires authentication.")
     @GetMapping(value = "/me", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -49,12 +58,48 @@ public class UserController {
     @Operation(summary = "Update current user's profile", description = "Requires authentication.")
     @PutMapping(value = "/me", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<ApiResponseDto<UserResponseDto>> updateMyProfile(
+    public ResponseEntity<ApiResponseDto<?>> updateMyProfile( 
             @Valid @RequestBody UserUpdateRequestDto userUpdateRequestDto) {
-        UserResponseDto updatedProfile = userService.updateMyProfile(userUpdateRequestDto);
-        ApiResponseDto<UserResponseDto> response = new ApiResponseDto<>("Profile updated successfully",
-                HttpStatus.OK.value(), updatedProfile);
-        return ResponseEntity.ok(response);
+
+        Authentication originalAuth = SecurityContextHolder.getContext().getAuthentication();
+        String originalUsername = originalAuth.getName();
+
+        UserResponseDto updatedProfile = userService.updateMyProfile(userUpdateRequestDto); 
+
+       
+        boolean usernameChanged = userUpdateRequestDto.getUsername() != null &&
+                                  !updatedProfile.getUsername().equals(originalUsername);
+
+        if (usernameChanged) {
+           
+            Authentication updatedAuth = SecurityContextHolder.getContext().getAuthentication();
+            String newToken = tokenProvider.generateToken(updatedAuth); 
+
+            
+            AuthResponseDto authResponse = new AuthResponseDto(
+                newToken,
+                updatedProfile.getId(),
+                updatedProfile.getUsername(),
+                updatedProfile.getEmail(),
+                updatedAuth.getAuthorities().stream()
+                    .map(grantedAuthority -> grantedAuthority.getAuthority())
+                    .collect(Collectors.toSet())
+            );
+
+            ApiResponseDto<AuthResponseDto> response = new ApiResponseDto<>(
+                "Profile updated successfully. New token issued.",
+                HttpStatus.OK.value(),
+                authResponse
+            );
+            return ResponseEntity.ok(response);
+        } else {
+            ApiResponseDto<UserResponseDto> response = new ApiResponseDto<>(
+                "Profile updated successfully",
+                HttpStatus.OK.value(),
+                updatedProfile
+            );
+            return ResponseEntity.ok(response);
+        }
     }
 
     @Operation(summary = "Get all users", description = "Requires ADMIN or SUPERADMIN role.")
