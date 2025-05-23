@@ -29,6 +29,11 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import org.springframework.security.core.userdetails.UserDetails;
 import com.look.service.UserDetailsServiceImpl;
+import com.look.dto.AdminUserUpdateRequestDto; 
+import com.look.dto.UserCreateRequestDto;    
+import java.util.Date;                       
+import java.util.HashSet; 
+
 @Service 
 public class UserServiceImpl implements UserService { 
 
@@ -252,5 +257,96 @@ public class UserServiceImpl implements UserService {
         return user.getFollowing().stream()
                 .map(userMapper::userToUserResponseDto)
                 .collect(Collectors.toList());
+    }
+    @Override
+    @Transactional
+    public UserResponseDto createUserByAdmin(UserCreateRequestDto userCreateRequestDto) {
+        if (userRepository.existsByUsername(userCreateRequestDto.getUsername())) {
+            throw new BadRequestException("Username is already taken!");
+        }
+        if (userRepository.existsByEmail(userCreateRequestDto.getEmail())) {
+            throw new BadRequestException("Email is already in use!");
+        }
+
+        User user = new User();
+        user.setUsername(userCreateRequestDto.getUsername());
+        user.setEmail(userCreateRequestDto.getEmail());
+        user.setPassword(passwordEncoder.encode(userCreateRequestDto.getPassword()));
+        user.setProfilePictureUri(userCreateRequestDto.getProfilePictureUri());
+        user.setCreatedAt(new Date());
+        user.setEnabled(userCreateRequestDto.getEnabled() != null ? userCreateRequestDto.getEnabled() : true);
+        user.setAccountNonExpired(true);
+        user.setAccountNonLocked(user.isEnabled()); // Account locked if not enabled
+        user.setCredentialsNonExpired(true);
+
+        Set<String> strRoles = userCreateRequestDto.getRoles();
+        Set<Role> roles = new HashSet<>();
+
+        if (strRoles == null || strRoles.isEmpty()) {
+            throw new BadRequestException("User must be assigned at least one role.");
+        } else {
+            strRoles.forEach(roleName -> {
+                Role role = roleRepository.findByName(roleName)
+                        .orElseThrow(() -> new ResourceNotFoundException("Error: Role " + roleName + " is not found."));
+                roles.add(role);
+            });
+        }
+        user.setRoles(roles);
+
+        User savedUser = userRepository.save(user);
+        return userMapper.userToUserResponseDto(savedUser);
+    }
+
+    @Override
+    @Transactional
+    public UserResponseDto updateUserByAdmin(String userId, AdminUserUpdateRequestDto adminUserUpdateRequestDto) {
+        User userToUpdate = userRepository.findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + userId));
+
+        User currentUser = getCurrentAuthenticatedUser();
+        if (currentUser.getId().equals(userToUpdate.getId())) {
+            throw new BadRequestException("Admins cannot use this endpoint to update their own account. Use /me endpoint.");
+        }
+
+        if (adminUserUpdateRequestDto.getUsername() != null && !adminUserUpdateRequestDto.getUsername().equals(userToUpdate.getUsername())) {
+            if (userRepository.existsByUsername(adminUserUpdateRequestDto.getUsername())) {
+                throw new BadRequestException("Username '" + adminUserUpdateRequestDto.getUsername() + "' is already taken!");
+            }
+            userToUpdate.setUsername(adminUserUpdateRequestDto.getUsername());
+        }
+
+        if (adminUserUpdateRequestDto.getEmail() != null && !adminUserUpdateRequestDto.getEmail().equals(userToUpdate.getEmail())) {
+            if (userRepository.existsByEmail(adminUserUpdateRequestDto.getEmail())) {
+                throw new BadRequestException("Email '" + adminUserUpdateRequestDto.getEmail() + "' is already in use!");
+            }
+            userToUpdate.setEmail(adminUserUpdateRequestDto.getEmail());
+        }
+
+        if (adminUserUpdateRequestDto.getPassword() != null && !adminUserUpdateRequestDto.getPassword().isEmpty()) {
+            userToUpdate.setPassword(passwordEncoder.encode(adminUserUpdateRequestDto.getPassword()));
+        }
+
+        if (adminUserUpdateRequestDto.getProfilePictureUri() != null) {
+            userToUpdate.setProfilePictureUri(adminUserUpdateRequestDto.getProfilePictureUri());
+        }
+
+        if (adminUserUpdateRequestDto.getRoles() != null && !adminUserUpdateRequestDto.getRoles().isEmpty()) {
+            Set<String> requestedRoleNames = adminUserUpdateRequestDto.getRoles();
+            Set<Role> newRoles = roleRepository.findByNameIn(requestedRoleNames);
+            if (newRoles.size() != requestedRoleNames.size()) {
+                Set<String> foundNames = newRoles.stream().map(Role::getName).collect(Collectors.toSet());
+                requestedRoleNames.removeAll(foundNames);
+                throw new BadRequestException("Invalid role(s) specified: " + requestedRoleNames);
+            }
+            userToUpdate.setRoles(newRoles);
+        }
+
+        if (adminUserUpdateRequestDto.getEnabled() != null) {
+            userToUpdate.setEnabled(adminUserUpdateRequestDto.getEnabled());
+            userToUpdate.setAccountNonLocked(adminUserUpdateRequestDto.getEnabled()); // Lock account if disabled
+        }
+
+        User updatedUser = userRepository.save(userToUpdate);
+        return userMapper.userToUserResponseDto(updatedUser);
     }
 }

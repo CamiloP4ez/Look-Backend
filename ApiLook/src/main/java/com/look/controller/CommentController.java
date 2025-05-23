@@ -40,6 +40,18 @@ public class CommentController {
                 HttpStatus.CREATED.value(), createdComment);
         return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
+    
+    @Operation(summary = "Get all comments in the system", description = "Requires authentication. Potentially resource-intensive.")
+    @GetMapping(value = "/comments", produces = MediaType.APPLICATION_JSON_VALUE)
+    @PreAuthorize("hasAnyRole('ADMIN', 'SUPERADMIN')")
+    public ResponseEntity<ApiResponseDto<List<CommentResponseDto>>> getAllComments() {
+        List<CommentResponseDto> comments = commentService.getAllComments();
+        ApiResponseDto<List<CommentResponseDto>> response = new ApiResponseDto<>(
+                "All comments fetched successfully",
+                HttpStatus.OK.value(),
+                comments);
+        return ResponseEntity.ok(response);
+    }
 
     @Operation(summary = "Get all comments for a post", description = "Public endpoint.")
     @GetMapping(value = "/posts/{postId}/comments", produces = MediaType.APPLICATION_JSON_VALUE)

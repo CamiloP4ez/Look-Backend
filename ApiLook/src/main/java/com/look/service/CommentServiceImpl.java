@@ -66,6 +66,16 @@ public class CommentServiceImpl implements CommentService {
     }
 
      // --- Public Service Methods  ---
+    
+    @Override
+    public List<CommentResponseDto> getAllComments() {
+        List<Comment> comments = commentRepository.findAllByOrderByCreatedAtAsc();
+
+        return comments.stream()
+                .map(commentMapper::commentToCommentResponseDto)
+                .map(this::enrichCommentResponse) 
+                .collect(Collectors.toList());
+    }
 
     @Override 
     @Transactional
