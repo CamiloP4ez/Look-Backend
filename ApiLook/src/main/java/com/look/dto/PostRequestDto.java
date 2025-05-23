@@ -16,5 +16,5 @@ public class PostRequestDto {
     @NotBlank(message = "Content cannot be blank")
     private String content;
 
-    private String imageUri; // Opcional
+    private String imageUri; 
 }
