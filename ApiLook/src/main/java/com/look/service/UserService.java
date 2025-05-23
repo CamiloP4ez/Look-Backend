@@ -5,6 +5,8 @@ import com.look.dto.UserResponseDto;
 import com.look.dto.UserRoleUpdateRequestDto;
 import com.look.dto.UserStatusUpdateDto;
 import com.look.dto.UserUpdateRequestDto;
+import com.look.dto.AdminUserUpdateRequestDto;
+import com.look.dto.UserCreateRequestDto; 
 
 import java.util.List;
 
@@ -28,4 +30,7 @@ public interface UserService {
     void unfollowUser(String userIdToUnfollow);
     List<UserResponseDto> getFollowers(String userId);
     List<UserResponseDto> getFollowing(String userId);
+    
+    UserResponseDto createUserByAdmin(UserCreateRequestDto userCreateRequestDto);
+    UserResponseDto updateUserByAdmin(String userId, AdminUserUpdateRequestDto adminUserUpdateRequestDto);
 }

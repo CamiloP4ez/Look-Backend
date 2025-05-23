@@ -111,6 +111,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.PUT, "/api/v1/users/{userId}/roles").hasRole("SUPERADMIN")
 
                         .requestMatchers(HttpMethod.DELETE, "/api/v1/users/{userId}").hasRole("SUPERADMIN")
+                        .requestMatchers(HttpMethod.GET, "/api/v1/comments").authenticated()
 
                         .anyRequest().authenticated());
 

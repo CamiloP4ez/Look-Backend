@@ -30,6 +30,9 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import com.look.dto.AuthResponseDto; 
 import java.util.stream.Collectors; 
 
+import com.look.dto.UserCreateRequestDto;    
+import com.look.dto.AdminUserUpdateRequestDto;
+
 import java.util.List;
 
 @RestController
@@ -54,6 +57,29 @@ public class UserController {
                 HttpStatus.OK.value(), userProfile);
         return ResponseEntity.ok(response);
     }
+    @Operation(summary = "Create a new user", description = "Requires ADMIN or SUPERADMIN role. Allows setting username, email, password, and roles.")
+    @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @PreAuthorize("hasAnyRole('ADMIN', 'SUPERADMIN')")
+    public ResponseEntity<ApiResponseDto<UserResponseDto>> createUserByAdmin(
+            @Valid @RequestBody UserCreateRequestDto userCreateRequestDto) {
+        UserResponseDto newUser = userService.createUserByAdmin(userCreateRequestDto);
+        ApiResponseDto<UserResponseDto> response = new ApiResponseDto<>("User created successfully by admin",
+                HttpStatus.CREATED.value(), newUser);
+        return new ResponseEntity<>(response, HttpStatus.CREATED);
+    }
+
+    @Operation(summary = "Update any user's profile by ID (Admin)", description = "Requires ADMIN or SUPERADMIN role. Allows updating username, email, password, roles, and enabled status.")
+    @PutMapping(value = "/{userId}", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @PreAuthorize("hasAnyRole('ADMIN', 'SUPERADMIN')")
+    public ResponseEntity<ApiResponseDto<UserResponseDto>> updateUserByAdmin(
+            @Parameter(description = "ID of the user to update", required = true) @PathVariable String userId,
+            @Valid @RequestBody AdminUserUpdateRequestDto adminUserUpdateRequestDto) {
+        UserResponseDto updatedUser = userService.updateUserByAdmin(userId, adminUserUpdateRequestDto);
+        ApiResponseDto<UserResponseDto> response = new ApiResponseDto<>("User profile updated successfully by admin",
+                HttpStatus.OK.value(), updatedUser);
+        return ResponseEntity.ok(response);
+    }
+
 
     @Operation(summary = "Update current user's profile", description = "Requires authentication.")
     @PutMapping(value = "/me", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
