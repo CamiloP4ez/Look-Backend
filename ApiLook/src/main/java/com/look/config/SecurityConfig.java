@@ -100,7 +100,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.DELETE, "/api/v1/posts/{postId}/like")
                         .hasAnyRole("USER", "ADMIN", "SUPERADMIN")
 
-                        .requestMatchers(HttpMethod.GET, "/api/v1/users").hasAnyRole("ADMIN", "SUPERADMIN")
+                        .requestMatchers(HttpMethod.GET, "/api/v1/users").authenticated()
 
                         .requestMatchers(HttpMethod.GET, "/api/v1/users/me").authenticated()
 
