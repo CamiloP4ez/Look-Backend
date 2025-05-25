@@ -109,10 +109,11 @@ public class PostServiceImpl implements PostService {
                     + ". Lanzando ResourceNotFoundException.");
             throw new ResourceNotFoundException("User not found with id: " + userId);
         }
-        System.out.println(">>>> [PostService] Usuario SÍ encontrado  con ID: " + userId);
+        System.out.println(">>>> [PostService] Usuario SÍ encontrado con ID: " + userId);
 
         List<Post> posts = postRepository.findByUserIdOrderByCreatedAtDesc(userId);
         System.out.println(">>>> [PostService] Posts encontrados en BD para userId " + userId + ": " + posts.size());
+
         if (posts.isEmpty()) {
             System.out.println(">>>> [PostService] No se encontraron posts para este userId. Devolviendo lista vacía.");
             return Collections.emptyList();
@@ -120,18 +121,14 @@ public class PostServiceImpl implements PostService {
 
         return posts.stream()
                 .map(post -> {
-                    System.out.println(">>>> [PostService] Mapeando post con ID: " + post.getId() + " del usuario: "
+                    System.out.println(">>>> [PostService] Mapeando y enriqueciendo post con ID: " + post.getId() + " del usuario: "
                             + post.getUserId());
                     PostResponseDto dto = postMapper.postToPostResponseDto(post);
-
-                    return dto;
-                })
-                .map(dto -> {
-
-                    return dto;
+                    return enrichPostResponse(dto);
                 })
                 .collect(Collectors.toList());
     }
+
 
     @Override
     @Transactional
